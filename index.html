@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--
+    Het "slot" van deze pagina. De browser dwingt deze regels zelf af:
+    - connect-src 'none': de code mag NIETS naar internet sturen of ophalen.
+    - script-src 'self': alleen code van deze eigen site, geen code van andere sites.
+    - form-action 'none': er kunnen geen formulieren worden verstuurd.
+    - 'wasm-unsafe-eval' is nodig om de WebP-encoder (WebAssembly) te mogen draaien.
+    - worker-src: de achtergrond-werker start via een blob, en erft zo exact dezelfde regels.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self'; img-src 'self' blob:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>WebP-converter</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>WebP-converter</h1>
+      <p class="lead">Zet foto’s in één keer om naar WebP. Alles gebeurt op je eigen computer: er wordt niets geüpload en niets opgeslagen.</p>
+      <p class="status" id="engine-status" role="status">Encoder wordt geladen…</p>
+    </header>
+
+    <section class="settings" aria-label="Instellingen">
+      <div class="field">
+        <label for="quality">Kwaliteit <output id="quality-value" for="quality">90</output></label>
+        <input type="range" id="quality" min="50" max="100" step="1" value="90">
+        <p class="hint">90 is voor foto’s op een website visueel niet van het origineel te onderscheiden.</p>
+      </div>
+      <div class="field">
+        <label class="check"><input type="checkbox" id="lossless"> Lossless</label>
+        <p class="hint">Geen enkel kwaliteitsverlies, pixel voor pixel gelijk. Bestanden worden wel een stuk groter.</p>
+      </div>
+      <div class="field">
+        <label for="max-size">Maximale afmeting</label>
+        <select id="max-size">
+          <option value="0" selected>Origineel formaat</option>
+          <option value="3840">3840 px (4K)</option>
+          <option value="2560">2560 px</option>
+          <option value="2000">2000 px</option>
+          <option value="1600">1600 px</option>
+          <option value="1200">1200 px</option>
+          <option value="800">800 px</option>
+        </select>
+        <p class="hint">Langste zijde. Kleiner maken bespaart vaak meer dan het formaat zelf.</p>
+      </div>
+    </section>
+
+    <section id="dropzone" class="dropzone" aria-label="Foto’s toevoegen">
+      <p class="drop-title">Sleep foto’s of een hele map hierheen</p>
+      <p class="drop-sub">JPG, PNG, GIF, BMP, AVIF of WebP</p>
+      <div class="buttons">
+        <label class="button primary">Foto’s kiezen<input type="file" id="pick-files" accept="image/*" multiple hidden></label>
+        <label class="button">Map kiezen<input type="file" id="pick-folder" webkitdirectory multiple hidden></label>
+      </div>
+    </section>
+
+    <section id="results" class="results" hidden aria-label="Resultaten">
+      <div class="summary">
+        <p id="summary-text" role="status"></p>
+        <div class="buttons">
+          <button type="button" id="reconvert" class="button">Opnieuw omzetten met deze instellingen</button>
+          <button type="button" id="clear" class="button">Lijst leegmaken</button>
+          <button type="button" id="download-zip" class="button primary" disabled>Alles downloaden (.zip)</button>
+        </div>
+      </div>
+      <ul id="file-list" class="file-list"></ul>
+    </section>
+
+    <footer>
+      <p>Omzetten met <a href="https://github.com/webmproject/libwebp" rel="noopener noreferrer">libwebp</a> van Google, via <a href="https://github.com/jamsinclair/jSquash" rel="noopener noreferrer">jSquash</a>. Licenties staan in de map <code>vendor/webp</code>.</p>
+      <p>Camera-gegevens zoals GPS-locatie worden niet meegenomen in de WebP-bestanden.</p>
+    </footer>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
